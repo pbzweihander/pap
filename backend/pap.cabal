@@ -1,0 +1,81 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.36.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           pap
+version:        0.1.0.0
+description:    밥
+homepage:       https://github.com/pbzweihander/pap#readme
+bug-reports:    https://github.com/pbzweihander/pap/issues
+author:         Kangwook Lee
+maintainer:     pbzweihander@protonmail.com
+copyright:      2024 pbzweihander
+license:        MIT
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/pbzweihander/pap
+
+library
+  exposed-modules:
+      Db
+      Handler
+      Lib
+  other-modules:
+      Paths_pap
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      NoFieldSelectors
+      OverloadedRecordDot
+      LambdaCase
+      DeriveGeneric
+      DuplicateRecordFields
+      TemplateHaskell
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , file-embed
+    , hashtables
+    , http-types
+    , stm
+    , text
+    , time
+    , wai
+    , wai-app-static
+    , wai-extra
+    , warp
+  default-language: Haskell2010
+
+executable pap-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_pap
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , pap
+  default-language: Haskell2010
+
+test-suite pap-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_pap
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , pap
+  default-language: Haskell2010

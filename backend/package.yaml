@@ -1,0 +1,81 @@
+name:                pap
+version:             0.1.0.0
+github:              "pbzweihander/pap"
+license:             MIT
+author:              "Kangwook Lee"
+maintainer:          "pbzweihander@protonmail.com"
+copyright:           "2024 pbzweihander"
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         밥
+
+dependencies:
+- base >= 4.7 && < 5
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+library:
+  source-dirs: src
+
+  default-extensions:
+  - OverloadedStrings
+  - NoFieldSelectors
+  - OverloadedRecordDot
+  - LambdaCase
+  - DeriveGeneric
+  - DuplicateRecordFields
+  - TemplateHaskell
+
+  dependencies:
+  - bytestring
+  - http-types
+  - wai
+  - wai-extra
+  - wai-app-static
+  - warp
+  - stm
+  - hashtables
+  - text
+  - aeson
+  - time
+  - file-embed
+
+executables:
+  pap-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - pap
+
+tests:
+  pap-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - pap
