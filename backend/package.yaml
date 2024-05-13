@@ -6,8 +6,7 @@ author:              "Kangwook Lee"
 maintainer:          "pbzweihander@protonmail.com"
 copyright:           "2024 pbzweihander"
 
-extra-source-files:
-- README.md
+extra-source-files: []
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -45,18 +44,20 @@ library:
   - TemplateHaskell
 
   dependencies:
-  - bytestring
-  - http-types
-  - wai
-  - wai-extra
-  - wai-app-static
-  - warp
-  - stm
-  - hashtables
-  - text
   - aeson
-  - time
+  - bytestring
   - file-embed
+  - hashtables
+  - http-types
+  - modern-uri
+  - req
+  - stm
+  - text
+  - time
+  - wai
+  - wai-app-static
+  - wai-extra
+  - warp
 
 executables:
   pap-exe:

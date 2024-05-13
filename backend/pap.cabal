@@ -14,8 +14,6 @@ maintainer:     pbzweihander@protonmail.com
 copyright:      2024 pbzweihander
 license:        MIT
 build-type:     Simple
-extra-source-files:
-    README.md
 
 source-repository head
   type: git
@@ -46,6 +44,8 @@ library
     , file-embed
     , hashtables
     , http-types
+    , modern-uri
+    , req
     , stm
     , text
     , time

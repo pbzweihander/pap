@@ -6,33 +6,40 @@ module Handler (
   postRoom,
   putRoom,
   deleteRoom,
-) where
+)
+where
 
 import Control.Concurrent.Chan
 import Data.Aeson
-import Data.ByteString.Builder (string8)
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Builder as BSB
 import qualified Data.List as L
 import qualified Data.Text as T
-import Data.Text.Encoding (decodeUtf8)
+import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Db
 import GHC.Generics (Generic)
+import qualified Network.HTTP.Req as R
 import Network.HTTP.Types
 import Network.Wai
 import Network.Wai.EventSource
 
-data Context = Context {db :: Db, chan :: Chan ServerEvent}
+data Context scheme = Context
+  { db :: Db
+  , chan :: Chan ServerEvent
+  , slackWebhookUrl :: R.Url scheme
+  }
 
 pushEvent :: Chan ServerEvent -> IO ()
 pushEvent chan = do
   time <- getPOSIXTime
-  writeChan chan (ServerEvent Nothing Nothing [string8 . show $ time])
+  writeChan chan (ServerEvent Nothing Nothing [BSB.string8 . show $ time])
 
-getEvent :: Context -> Application
+getEvent :: Context scheme -> Application
 getEvent ctx req respond = do
   eventSourceAppChan ctx.chan req respond
 
-getRooms :: Context -> Application
+getRooms :: Context scheme -> Application
 getRooms ctx _ respond = do
   rooms <- listRooms ctx.db
   respond $ responseLBS status200 [("content-type", "application/json")] $ encode rooms
@@ -42,7 +49,7 @@ newtype GetRoomReq = GetRoomReq {user :: User}
 
 instance FromJSON GetRoomReq
 
-getRoom :: Context -> Application
+getRoom :: Context scheme -> Application
 getRoom ctx rawReq respond = do
   case L.find (\(k, _) -> k == "user") $ queryString rawReq of
     Just (_, Just user) -> do
@@ -55,7 +62,7 @@ data PostRoomReq = PostRoomReq {name :: RoomName, user :: User, notice :: T.Text
 
 instance FromJSON PostRoomReq
 
-postRoom :: Context -> Application
+postRoom :: Context scheme -> Application
 postRoom ctx rawReq respond = do
   rawReqBody <- strictRequestBody rawReq
   let maybeReq = decode rawReqBody :: Maybe PostRoomReq
@@ -66,6 +73,27 @@ postRoom ctx rawReq respond = do
           createRoom ctx.db req.name req.user req.notice
           res <- respond $ responseLBS status200 [] ""
           pushEvent ctx.chan
+          _ <- R.runReq R.defaultHttpConfig $ do
+            R.req
+              R.POST
+              ctx.slackWebhookUrl
+              ( R.ReqBodyBs $
+                  BS.toStrict $
+                    BSB.toLazyByteString $
+                      BSB.byteString "{\"text\":\""
+                        <> BSB.byteString (encodeUtf8 req.user)
+                        <> "님이 "
+                        <> BSB.byteString (encodeUtf8 req.name)
+                        <> " 방을 만들었어요.\",\"blocks\":[{\"type\":\"header\",\"text\":{\"type\":\"plain_text\",\"text\":\""
+                        <> BSB.byteString (encodeUtf8 req.name)
+                        <> "\",\"emoji\":false}},{\"type\":\"section\",\"text\":{\"type\":\"plain_text\",\"text\":\""
+                        <> BSB.byteString (encodeUtf8 req.notice)
+                        <> "\",\"emoji\":false}},{\"type\":\"context\",\"elements\":[{\"type\":\"plain_text\",\"text\":\""
+                        <> BSB.byteString (encodeUtf8 req.user)
+                        <> "\",\"emoji\":false}]},{\"type\":\"divider\"}]}"
+              )
+              R.ignoreResponse
+              (R.header "content-type" "application/json")
           pure res
         else
           respond $ responseLBS status400 [] ""
@@ -76,7 +104,7 @@ data PutRoomReq = PutRoomReq {name :: RoomName, user :: User}
 
 instance FromJSON PutRoomReq
 
-putRoom :: Context -> Application
+putRoom :: Context scheme -> Application
 putRoom ctx rawReq respond = do
   rawReqBody <- strictRequestBody rawReq
   let maybeReq = decode rawReqBody :: Maybe PutRoomReq
@@ -97,7 +125,7 @@ newtype DeleteRoomReq = DeleteRoomReq {user :: User}
 
 instance FromJSON DeleteRoomReq
 
-deleteRoom :: Context -> Application
+deleteRoom :: Context scheme -> Application
 deleteRoom ctx rawReq respond = do
   rawReqBody <- strictRequestBody rawReq
   let maybeReq = decode rawReqBody :: Maybe DeleteRoomReq
