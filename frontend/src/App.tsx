@@ -197,8 +197,11 @@ export default function App() {
             ) : (
               <>
                 <div className="divider">방 만들기</div>
-                <form className="flex" onSubmit={createRoom}>
-                  <label className="input input-bordered flex items-center gap-2 mb-4 flex-[2] mr-2">
+                <form
+                  className="flex flex-col lg:flex-row"
+                  onSubmit={createRoom}
+                >
+                  <label className="input input-bordered flex items-center gap-2 mb-4 lg:flex-[2] mr-2">
                     <span className="w-max">이름</span>
                     <input
                       type="text"
@@ -211,7 +214,7 @@ export default function App() {
                       }}
                     />
                   </label>
-                  <label className="input input-bordered flex items-center gap-2 mb-4 flex-[8] mr-2">
+                  <label className="input input-bordered flex items-center gap-2 mb-4 lg:flex-[8] mr-2">
                     설명
                     <input
                       type="text"
